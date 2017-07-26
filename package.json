@@ -1,5 +1,5 @@
 {
-  "name": "signalk-defaults-updates",
+  "name": "signalk-wilhelmsk-plugin",
   "version": "1.0.0",
   "description": "Signal K node server plugin to allow clients to update the defaults.json file",
   "main": "index.js",
@@ -17,6 +17,6 @@
   },
   "repository": {
     "type" : "git",
-    "url" : "https://github.com/sbender9/signalk-defaults-updates"
+    "url" : "https://github.com/sbender9/signalk-wilhelmsk-plugin"
   }
 }
