@@ -1,0 +1,22 @@
+{
+  "name": "signalk-defaults-updates",
+  "version": "1.0.0",
+  "description": "Signal K node server plugin to allow clients to update the defaults.json file",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "signalk-node-server-plugin"
+  ],
+  "author": {"name": "Scott Bender", "email": "scott@scottbender.net"},
+  "license": "ISC",
+  "dependencies": {
+    "debug": "^2.2.0",
+    "lodash": "^4.5.2"
+  },
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/sbender9/signalk-defaults-updates"
+  }
+}
