@@ -7,8 +7,8 @@ const _ = require('lodash')
 
 module.exports = function(app) {
   var plugin = {}
-  var gaugesFile
-  var gauges
+  var dataFile
+  var data
 
   plugin.id = "wilhelmsk-plugin"
   plugin.name = "WilhelmSK Plugin"
@@ -23,26 +23,27 @@ module.exports = function(app) {
 
   plugin.start = function(options) {
     var dir = app.config.configPath || app.config.appPath
-    gaugesFile = path.join(dir, 'plugin-config-data/wilhelmsk-gauges.json');
-    debug("gauges file: " + gaugesFile)
+    dataFile = path.join(dir, 'plugin-config-data/wilhelmsk-data.json');
+    debug("data file: " + dataFile)
 
-    gauges = readGauges()
+    data = readData()
+
     return true
   }
 
-  function readGauges() {
-    var res = {}
-    if ( fs.existsSync(gaugesFile) ) {
-      var gaugesString = fs.readFileSync(gaugesFile)
-      res = JSON.parse(gaugesString);
+  function readData() {
+    var res = { gauges: {} }
+    if ( fs.existsSync(dataFile) ) {
+      var dataString = fs.readFileSync(dataFile)
+      res = JSON.parse(dataString);
     }
     return res
   }
 
-  function saveGauges(gauges, done) {
-    var json = JSON.stringify(gauges, null, 2)
+  function saveData(done) {
+    var json = JSON.stringify(data, null, 2)
     
-    fs.writeFile(gaugesFile, json,
+    fs.writeFile(dataFile, json,
                  function(err) {
                    if (err) {
                      debug(err.stack)
@@ -60,7 +61,7 @@ module.exports = function(app) {
 
   plugin.registerWithRouter = function(router) {
     router.get("/get/gauges", (req, res) => {
-      res.json(gauges)
+      res.json(data.gauges)
     });
 
     router.post("/delete/gauge", (req, res) => {
@@ -68,10 +69,10 @@ module.exports = function(app) {
       
       debug("title: " + title);
 
-      var gauge = gauges[title]
+      var gauge = data.gauges[title]
       if ( typeof gauge !== 'undefined' ) {
-        delete gauges[title]
-        saveGauges(gauges, function(err) {
+        delete data.gauges[title]
+        saveData(function(err) {
           if (err) {
             res.status(500)
             res.send(err)
@@ -101,9 +102,9 @@ module.exports = function(app) {
         return
       }
 
-      gauges[title] = gauge
+      data.gauges[title] = gauge
 
-      saveGauges(gauges, function(err) {
+      saveData(function(err) {
         if (err) {
           res.status(500)
           res.send(err)
