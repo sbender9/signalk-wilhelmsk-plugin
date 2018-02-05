@@ -1,8 +1,21 @@
-const debug = require('debug')('wilhelmsk-plugin')
-const util = require('util')
+/**
+ * Copyright 2018 Scott Bender (scott@scottbender.net)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 const path = require('path')
 const fs = require('fs')
-
 const _ = require('lodash')
 
 module.exports = function(app) {
@@ -24,7 +37,7 @@ module.exports = function(app) {
   plugin.start = function(options) {
     var dir = app.config.configPath || app.config.appPath
     dataFile = path.join(dir, 'plugin-config-data/wilhelmsk-data.json');
-    debug("data file: " + dataFile)
+    app.debug("data file: " + dataFile)
 
     data = readData()
 
@@ -46,8 +59,8 @@ module.exports = function(app) {
     fs.writeFile(dataFile, json,
                  function(err) {
                    if (err) {
-                     debug(err.stack)
-                     console.log(err)
+                     app.error(err.stack)
+                     app.error(err)
                      done(err)
                      return
                    }
@@ -67,7 +80,7 @@ module.exports = function(app) {
     router.post("/delete/gauge", (req, res) => {
       var title = req.body.title
       
-      debug("title: " + title);
+      app.debug("title: " + title);
 
       var gauge = data.gauges[title]
       if ( typeof gauge !== 'undefined' ) {
@@ -91,7 +104,7 @@ module.exports = function(app) {
     router.post("/save/gauge", (req, res) => {
       var gauge = req.body
 
-      debug("gauge: " + JSON.stringify(gauge))
+      app.debug("gauge: " + JSON.stringify(gauge))
 
       var title = gauge.title;
       
@@ -139,7 +152,7 @@ module.exports = function(app) {
       ]
     }
 
-    debug("sending delta: " + JSON.stringify(delta))
+    app.debug("sending delta: " + JSON.stringify(delta))
     app.handleMessage(plugin.id, delta)
   }
 
