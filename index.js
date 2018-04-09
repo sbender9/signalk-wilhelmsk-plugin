@@ -77,6 +77,10 @@ module.exports = function(app) {
       res.json(data.gauges)
     });
 
+    app.get('/wilhelmsk/gauges', (req, res) => {
+      res.json(data.gauges)
+    });
+
     router.post("/delete/gauge", (req, res) => {
       var title = req.body.title
       
