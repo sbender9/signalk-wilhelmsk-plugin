@@ -40,7 +40,7 @@ module.exports = function(app) {
     app.debug("data file: " + dataFile)
 
     data = readData()
-
+    
     return true
   }
 
@@ -132,6 +132,19 @@ module.exports = function(app) {
       });
       
     })
+
+    router.post("/get/paths", (req, res) => {
+      let paths = req.body.paths
+      let response = {}
+      paths.forEach(path => {
+        let value = app.getSelfPath(path)
+        if ( !_.isUndefined(value) ) {
+          response[path] = value
+        }
+      })
+      res.json(response)
+    })
+
   }
   
 
