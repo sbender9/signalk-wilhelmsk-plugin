@@ -1,6 +1,6 @@
 {
   "name": "signalk-wilhelmsk-plugin",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Signal K node server plugin that's provides special functionality for WilhelmSK",
   "main": "index.js",
   "scripts": {
