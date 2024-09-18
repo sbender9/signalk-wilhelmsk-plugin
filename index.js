@@ -145,6 +145,49 @@ module.exports = function(app) {
       res.json(response)
     })
 
+    router.get("/get/switches", (req, res) => {
+      let response = {}
+
+      let paths = app.streambundle.getAvailablePaths()
+
+      paths.forEach(path => {
+        if ( path.endsWith('.state') ) {
+          let parent = path.substring(0, path.length-6)
+          let meta =  app.getMetadata('vessels.self.'  + path) || app.getMetadata('vessels.self.'  + parent)
+          if ( meta && meta.displayName )
+          {
+            response[meta.displayName] = {
+              path,
+              meta
+            }
+          }
+        }
+      })
+      
+      res.json(response)
+    })
+
+    router.get("/get/multiSwitches", (req, res) => {
+      let response = {}
+
+      let paths = app.streambundle.getAvailablePaths()
+
+      paths.forEach(path => {
+        if ( path.endsWith('.modeNumber') || path.endsWith('.preset') ) {
+          let parent = path.substring(0, path.length-6)
+          let meta =  app.getMetadata('vessels.self.'  + path) || app.getMetadata('vessels.self.'  + parent)
+          if ( meta && meta.displayName && meta.possibleValues )
+          {
+            response[meta.displayName] = {
+              path,
+              meta
+            }
+          }
+        }
+      })
+
+      res.json(response)
+    })
   }
   
 
