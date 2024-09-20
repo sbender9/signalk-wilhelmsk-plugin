@@ -151,12 +151,21 @@ module.exports = function(app) {
       let paths = app.streambundle.getAvailablePaths()
 
       paths.forEach(path => {
-        if ( path.endsWith('.state') ) {
-          let parent = path.substring(0, path.length-6)
-          let meta =  app.getMetadata('vessels.self.'  + path) || app.getMetadata('vessels.self.'  + parent)
-          if ( meta && meta.displayName )
+        let meta = app.getMetadata('vessels.self.'  + path)
+        
+        if ( path.endsWith('.state') || (meta && meta.units && meta.units == 'bool') ) {
+          let displayName = meta && meta.displayName ? meta.displayName : undefined
+          if ( !displayName ) {
+            let parent = path.substring(0, path.length-6)
+            meta =  app.getMetadata('vessels.self.'  + parent)
+            if ( meta ) {
+              displayName = meta.displayName
+            }
+          }
+          
+          if ( meta && displayName )
           {
-            response[meta.displayName] = {
+            response[displayName] = {
               path,
               meta
             }
@@ -173,23 +182,59 @@ module.exports = function(app) {
       let paths = app.streambundle.getAvailablePaths()
 
       paths.forEach(path => {
-        if ( path.endsWith('.modeNumber') || path.endsWith('.preset') ) {
-          let parent = path.substring(0, path.length-6)
-          let meta =  app.getMetadata('vessels.self.'  + path) || app.getMetadata('vessels.self.'  + parent)
-          if ( meta && meta.displayName && meta.possibleValues )
-          {
-            response[meta.displayName] = {
-              path,
-              meta
-            }
+        let meta =  app.getMetadata('vessels.self.'  + path)
+        if ( meta && meta.displayName && meta.possibleValues )
+        {
+          response[meta.displayName] = {
+            path,
+            meta
           }
         }
       })
 
       res.json(response)
     })
+
+    router.get("/get/putPaths", (req, res) => {
+      let response = []
+
+      let paths = app.streambundle.getAvailablePaths()
+
+      paths.forEach(path => {
+        if ( path.startsWith('notifications.') )
+          return
+        
+        let parent = path.substring(0, path.length-6)
+        let meta =  app.getMetadata('vessels.self.'  + path)
+        if ( meta && meta.supportsPut )
+        {
+          response.push( {
+            path,
+            meta
+          })
+        }
+      })
+      
+      res.json({paths: response})
+    })
+
+    router.get("/get/allPaths", (req, res) => {
+      let paths = app.streambundle.getAvailablePaths()
+
+      let response = paths.filter(path => {
+        return !path.startsWith('notifications.') && path !== ""
+      })
+
+        
+      res.json({ paths: response })
+    })
+
+    router.get("/get/meta/:path", (req, res) => {
+      let path = req.params.path
+      let meta =  app.getMetadata('vessels.self.'  + path)
+      res.json(meta ? { meta } : {})
+    })
   }
-  
 
   plugin.stop = function() {
   }
