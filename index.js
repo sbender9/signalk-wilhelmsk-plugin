@@ -165,9 +165,13 @@ module.exports = function(app) {
           
           if ( meta && displayName )
           {
-            response[displayName] = {
-              path,
-              meta
+            let val = app.getSelfPath(path)
+            if ( val && (val.value == 0 || val.value == 1 || val.value == true || val.value == false ))
+            {
+              response[displayName] = {
+                path,
+                meta
+              }
             }
           }
         }
