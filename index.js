@@ -132,8 +132,10 @@ module.exports = function(app) {
       });
       
     })
+  }
 
-    router.post("/get/paths", (req, res) => {
+  plugin.signalKApiRoutes = (router) => {
+    router.post("/wsk/paths", (req, res) => {
       let paths = req.body.paths
       let response = {}
       paths.forEach(path => {
@@ -145,7 +147,7 @@ module.exports = function(app) {
       res.json(response)
     })
 
-    router.get("/get/switches", (req, res) => {
+    router.get("/wsk/switches", (req, res) => {
       let response = {}
 
       let paths = app.streambundle.getAvailablePaths()
@@ -180,7 +182,7 @@ module.exports = function(app) {
       res.json(response)
     })
 
-    router.get("/get/multiSwitches", (req, res) => {
+    router.get("/wsk/multiSwitches", (req, res) => {
       let response = {}
 
       let paths = app.streambundle.getAvailablePaths()
@@ -199,16 +201,16 @@ module.exports = function(app) {
       res.json(response)
     })
 
-    router.get("/get/putPaths", (req, res) => {
+    router.get("/wsk/putPaths", (req, res) => {
       let response = []
 
       let paths = app.streambundle.getAvailablePaths()
+      let putPaths = []
 
       paths.forEach(path => {
         if ( path.startsWith('notifications.') )
           return
         
-        let parent = path.substring(0, path.length-6)
         let meta =  app.getMetadata('vessels.self.'  + path)
         if ( meta && meta.supportsPut )
         {
@@ -218,11 +220,25 @@ module.exports = function(app) {
           })
         }
       })
+
+      if ( response.length == 0 ) {
+        paths.forEach(path => {
+          if ( path.startsWith('notifications.') )
+            return
+          
+          let meta =  app.getMetadata('vessels.self.'  + path)
+          
+          response.push( {
+            path,
+            meta
+          })
+        })
+      }
       
       res.json({paths: response})
     })
 
-    router.get("/get/allPaths", (req, res) => {
+    router.get("/wsk/allPaths", (req, res) => {
       let paths = app.streambundle.getAvailablePaths()
 
       let response = paths.filter(path => {
@@ -233,11 +249,14 @@ module.exports = function(app) {
       res.json({ paths: response })
     })
 
-    router.get("/get/meta/:path", (req, res) => {
+    router.get("/wsk/meta/:path", (req, res) => {
       let path = req.params.path
       let meta =  app.getMetadata('vessels.self.'  + path)
-      res.json(meta ? { meta } : {})
+      console.log(meta)
+      res.json(meta ? meta : {})
     })
+
+    return router
   }
 
   plugin.stop = function() {
