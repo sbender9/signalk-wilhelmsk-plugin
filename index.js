@@ -134,10 +134,56 @@ module.exports = function(app) {
     })
   }
 
+  function getSwitchInfo(paths, requirePutSupportMeta)
+  {
+    let response = {}
+
+    paths.forEach(path => {
+      
+      let meta = app.getMetadata('vessels.self.'  + path)
+
+      if ( requirePutSupportMeta && (meta === undefined || meta.supportsPut === undefined || meta.supportsPut === false )) {
+        return
+      }
+      
+      if ( path.endsWith('.state') || (meta && meta.units && meta.units == 'bool') ) {
+        let displayName = meta && meta.displayName ? meta.displayName : undefined
+        if ( !displayName ) {
+          let parent = path.substring(0, path.length-6)
+          meta =  app.getMetadata('vessels.self.'  + parent)
+          if ( meta ) {
+            displayName = meta.displayName
+          }
+        }
+
+        if ( displayName === undefined )
+        {
+          let parts = path.split('.')
+          displayName = parts[parts.length-2]
+          //displayName = path
+        }
+
+        if ( meta && displayName )
+        {
+          let val = app.getSelfPath(path)
+          if ( val && (val.value == 0 || val.value == 1 || val.value == true || val.value == false || val.value === 'on' || val.value === 'off'))
+          {
+            response[displayName] = {
+              path,
+              displayName,
+              meta
+            }
+          }
+        }
+      }
+    })
+    return response
+  }
+  
   plugin.signalKApiRoutes = (router) => {
     router.post("/wsk/paths", (req, res) => {
       let paths = req.body.paths
-      let response = {}
+      let response =
       paths.forEach(path => {
         let value = app.getSelfPath(path)
         if ( !_.isUndefined(value) ) {
@@ -148,37 +194,14 @@ module.exports = function(app) {
     })
 
     router.get("/wsk/switches", (req, res) => {
-      let response = {}
-
       let paths = app.streambundle.getAvailablePaths()
 
-      paths.forEach(path => {
-        let meta = app.getMetadata('vessels.self.'  + path)
-        
-        if ( path.endsWith('.state') || (meta && meta.units && meta.units == 'bool') ) {
-          let displayName = meta && meta.displayName ? meta.displayName : undefined
-          if ( !displayName ) {
-            let parent = path.substring(0, path.length-6)
-            meta =  app.getMetadata('vessels.self.'  + parent)
-            if ( meta ) {
-              displayName = meta.displayName
-            }
-          }
-          
-          if ( meta && displayName )
-          {
-            let val = app.getSelfPath(path)
-            if ( val && (val.value == 0 || val.value == 1 || val.value == true || val.value == false ))
-            {
-              response[displayName] = {
-                path,
-                meta
-              }
-            }
-          }
-        }
-      })
-      
+      let response = getSwitchInfo(paths, true)
+
+      if ( Object.keys(response).length === 0 ) {
+        response = getSwitchInfo(paths, false)
+      }
+
       res.json(response)
     })
 
