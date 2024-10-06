@@ -102,7 +102,19 @@ module.exports = function(app) {
         res.status(404);
         res.send("Not found");
       }
-    });
+
+      router.post("/get/paths", (req, res) => {
+        let paths = req.body.paths
+        let response = {}
+        paths.forEach(path => {
+          let value = app.getSelfPath(path)
+          if ( !_.isUndefined(value) ) {
+            response[path] = value
+          }
+        })
+        res.json(response)
+      })
+    })
 
    
     router.post("/save/gauge", (req, res) => {
@@ -182,12 +194,14 @@ module.exports = function(app) {
   
   plugin.signalKApiRoutes = (router) => {
     router.post("/wsk/paths", (req, res) => {
-      let paths = req.body.paths
-      let response =
-      paths.forEach(path => {
-        let value = app.getSelfPath(path)
+      let paths = req.body
+      let response = {}
+      paths.forEach(pi => {
+        //FIXME: handle source
+        let value = app.getSelfPath(pi.path)
+        let source = pi.source
         if ( !_.isUndefined(value) ) {
-          response[path] = value
+          response[pi.path] = value
         }
       })
       res.json(response)
