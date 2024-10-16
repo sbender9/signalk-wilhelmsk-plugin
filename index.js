@@ -18,6 +18,8 @@ const path = require('path')
 const fs = require('fs')
 const _ = require('lodash')
 
+const banksPath = 'electrical.switches.bank'
+
 module.exports = function(app) {
   var plugin = {}
   var dataFile
@@ -207,6 +209,26 @@ module.exports = function(app) {
       res.json(response)
     })
 
+    router.get("/wsk/switchBanks", (req, res) => {
+      let banks = app.getSelfPath(banksPath)
+      let response = {}
+      _.keys(banks).forEach( bank => {
+        let mpath = `vessels.self.${banksPath}.${bank}`
+        let meta =  app.getMetadata(mpath)
+        response[`${banksPath}.${bank}`] = {
+          displayName: meta && meta.displayName,
+          switches: Object.keys(banks[bank]).map(s => {
+            let meta = app.getMetadata(`vessels.self.${banksPath}.${bank}.${s}`)
+            return {
+              key: s,
+              displayName: meta && meta.displayName
+            }
+          })
+        }
+      })
+      res.json(response)
+    })
+      
     router.get("/wsk/switches", (req, res) => {
       let paths = app.streambundle.getAvailablePaths()
 
@@ -285,7 +307,7 @@ module.exports = function(app) {
         
       res.json({ paths: response })
     })
-
+    
     router.get("/wsk/meta/:path", (req, res) => {
       let path = req.params.path
       let meta =  app.getMetadata('vessels.self.'  + path)
