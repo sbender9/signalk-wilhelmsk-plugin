@@ -182,7 +182,7 @@ module.exports = function(app) {
           let val = app.getSelfPath(path)
           if ( val && (val.value == 0 || val.value == 1 || val.value == true || val.value == false || val.value === 'on' || val.value === 'off'))
           {
-            response[displayName] = {
+            response[path] = {
               path,
               displayName,
               meta
@@ -250,7 +250,7 @@ module.exports = function(app) {
         let meta =  app.getMetadata('vessels.self.'  + path)
         if ( meta && meta.displayName && meta.possibleValues )
         {
-          response[meta.displayName] = {
+          response[path] = {
             path,
             meta
           }
